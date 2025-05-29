@@ -18,8 +18,9 @@
 		<script>
 			/** @type {HTMLTextAreaElement} */
 			const tinput = document.getElementById("tinput");
+			const charleft = document.getElementById("charleft");
 			tinput.addEventListener("input", () => {
-				charleft.textContent = `${tinput.value.split("\n").length}line ${tinput.value.split(" ").length}word ${tinput.value.length}char`;
+				charleft.textContent = `${tinput.value.split("\n").length}line ${tinput.value.split(/\s+/).length}word ${tinput.value.length}char`;
 			});
 		</script>
 	</body>
