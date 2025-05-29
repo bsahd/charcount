@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ja">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>charcter counter</title>
+		<style></style>
+	</head>
+	<body>
+		<style>
+			textarea {
+				width: 100%;
+				height: calc(100vh - 64px);
+			}
+		</style>
+		<textarea id="tinput" rows="7" cols="40"></textarea>
+		<div id="charleft">0line 0word 0char</div>
+		<script>
+			/** @type {HTMLTextAreaElement} */
+			const tinput = document.getElementById("tinput");
+			tinput.addEventListener("input", () => {
+				charleft.textContent = `${tinput.value.split("\n").length}line ${tinput.value.split(" ").length}word ${tinput.value.length}char`;
+			});
+		</script>
+	</body>
+</html>
