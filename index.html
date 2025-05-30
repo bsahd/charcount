@@ -8,20 +8,136 @@
 	</head>
 	<body>
 		<style>
+			* {
+				box-sizing: border-box;
+			}
+			body {
+				display: grid;
+				grid-template-rows: 20px 1fr auto;
+				height: calc(100vh - 16px);
+			}
+			body,
+			textarea {
+				color: #333;
+			}
+			svg {
+				transform: rotate(-90deg);
+				display: inline-block;
+			}
+			.circle-bg,
+			.circle-fg {
+				fill: none;
+				stroke-width: 0.1;
+			}
+			.circle-bg {
+				stroke: #e0f0ff;
+			}
+			.circle-fg {
+				stroke: #1185fe;
+			}
+
+			*:focus-visible {
+				outline: 2px solid #1185fe;
+			}
+
+			.circle-fg.over {
+				stroke: #ff4444;
+			}
 			textarea {
 				width: 100%;
-				height: calc(100vh - 64px);
+				height: 100%;
+				font-family: sans-serif;
+			}
+			.input-wrapper {
+				position: relative;
+				margin-top: 8px;
+				margin-inline: auto;
+				max-width: 400px;
+				display: inline-block;
+			}
+
+			.input-wrapper input {
+				font-size: 16px;
+				padding: 8px 0 0 0;
+				border: none;
+				border-bottom: 1px solid #ddd;
+				background-color: transparent;
+			}
+			.input-wrapper input::-webkit-contacts-auto-fill-button {
+				visibility: hidden;
+				pointer-events: none;
+				position: absolute;
+			}
+
+			.input-wrapper label {
+				position: absolute;
+				top: -6px;
+				left: 0;
+				pointer-events: none;
+				font-family: sans-serif;
+				font-size: 11px;
 			}
 		</style>
+		<label for="tinput">text for counting:</label>
 		<textarea id="tinput" rows="7" cols="40"></textarea>
-		<div id="charleft">0line 0word 0char</div>
+		<div>
+			<span id="charcount"></span>,
+			<span class="input-wrapper">
+				<input type="number" id="targetlength" value="400" size="8" />
+				<label for="targetlength">target length</label></span
+			>,
+			<span id="charleft"></span>
+			<svg width="24" height="24" viewBox="0 0 1 1">
+				<circle class="circle-bg" cx="0.5" cy="0.5" r="0.4" />
+				<circle class="circle-fg" id="circleMeter" cx="0.5" cy="0.5" r="0.4" />
+			</svg>
+		</div>
 		<script>
 			/** @type {HTMLTextAreaElement} */
 			const tinput = document.getElementById("tinput");
+			const charcount = document.getElementById("charcount");
+			const circle = document.getElementById("circleMeter");
 			const charleft = document.getElementById("charleft");
-			tinput.addEventListener("input", () => {
-				charleft.textContent = `${tinput.value.split("\n").length}line ${tinput.value.split(/\s+/).length}word ${tinput.value.length}char`;
-			});
+			const targetlength = document.getElementById("targetlength");
+			const radius = 0.4;
+			const circumference = 2 * Math.PI * radius;
+			circle.style.strokeDasharray = circumference;
+			circle.style.strokeDashoffset = circumference;
+			function plural(n, unit) {
+				return `${n} ${unit}${n === 1 ? "" : "s"}`;
+			}
+
+			function redraw() {
+				const max = parseInt(targetlength.value);
+				charcount.textContent =
+					plural(tinput.value.trim().split("\n").length, "line") +
+					", " +
+					plural(
+						tinput.value.trim().split(/\s+/).filter(Boolean).length,
+						"word"
+					) +
+					", " +
+					plural([...tinput.value].length, "grapheme") +
+					", " +
+					plural(tinput.value.length, "char") +
+					", " +
+					plural(new TextEncoder().encode(tinput.value).length, "byte");
+				const count = tinput.value.length;
+				charleft.textContent =
+					max < count ? `${count - max} over` : `${max - count} left`;
+				const ratio = Math.min(count / max, 1);
+				const offset = circumference * (1 - ratio);
+				circle.style.strokeDashoffset = offset;
+				if (count > max) {
+					circle.classList.add("over");
+				} else {
+					circle.classList.remove("over");
+				}
+			}
+			tinput.addEventListener("input", redraw);
+
+			targetlength.addEventListener("input", redraw);
+			redraw();
 		</script>
 	</body>
 </html>
